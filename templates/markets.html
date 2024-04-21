@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        h1 {
+            text-align: center;
+            color: white;
+        }
+
+        p {
+            text-align: center;
+            color: white;
+        }
+
+        div {
+            text-align: center;
+            color: white;
+        }
+    </style>
+    <title>markets</title>
+    <h1>Sample Stock Exchange Webapp for CYBSC530 (PRAMA)</h1>>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.0/css/jquery.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+
+    <script>
+        $(document).ready(function () {
+            $('#marketsTable').DataTable();
+        });
+    </script>
+</head>
+
+<body style="background-color:rgb(31, 31, 31);">
+    <div class="container">
+        <a href="/">Exchanges</a> > <b>{{ code }}</b>
+        <p />
+
+        <h1>{{ code }}</h1>
+        <table id="marketsTable" class="table table-sm table-dark table-bordered table-hover table-striped">
+            <thead>
+                <tr>
+
+                    <th>Code</th>
+                    <th>Name</th>
+                    <th>Country</th>
+                    <th>Exchange</th>
+                    <th>Currency</th>
+                    <th>Type</th>
+                    <th>Isin</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in markets %}
+                <tr>
+                    <td><a href="/exchange/CC/{{ item.Code }}/1h">{{ item.Code }}</a></td>
+                    <td>{{ item.Name }}</td>
+                    <td>{{ item.Country }}</td>
+                    <td>{{ item.Exchange }}</td>
+                    <td>{{ item.Currency }}</td>
+                    <td>{{ item.Type }}</td>
+                    <td>{{ item.Isin }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

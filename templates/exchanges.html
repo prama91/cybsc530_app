@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        h1 {
+            text-align: center;
+            color: white;
+        }
+
+        p {
+            text-align: center;
+            color: white;
+        }
+
+        div {
+            text-align: center;
+            color: white;
+        }
+    </style>
+    <title>Exchanges</title>
+    <h1>Sample Stock Exchange Web App for CYBSC530 (PRAMA)</h1>>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.0/css/jquery.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <script>
+        $(document).ready(function () {
+            $('#exchangesTable').DataTable();
+        });
+    </script>
+</head>
+
+<body style="background-color:rgb(31, 31, 31);">
+    <div class=" container">
+        <h1>Exchanges</h1>
+        <table id="exchangesTable" class="table table-sm table-dark table-bordered table-hover table-striped">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Code</th>
+                    <th>OperatingMIC</th>
+                    <th>Currency</th>
+                    <th>CountryISO2</th>
+                    <th>CountryISO3</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for exchange in exchanges %}
+                <tr>
+                    <td><a href="/exchange/{{ exchange.Code }}">{{ exchange.Name }}</a></td>
+                    <td>{{ exchange.Code }}</td>
+                    <td>{{ exchange.OperatingMIC }}</td>
+                    <td>{{ exchange.Currency }}</td>
+                    <td>{{ exchange.CountryISO2 }}</td>
+                    <td>{{ exchange.CountryISO3 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>

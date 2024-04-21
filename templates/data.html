@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        h1 {
+            text-align: center;
+            color: white;
+        }
+
+        p {
+            text-align: center;
+            color: white;
+        }
+
+        div {
+            text-align: center;
+            color: white;
+        }
+    </style>
+    <title>{{ market }}.{{ code }} | {{ granularity }}</title>
+
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.11.0/css/jquery.dataTables.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj"
+        crossorigin="anonymous"></script>
+
+    <script>
+        $(document).ready(function () {
+            $('#dataTable').DataTable();
+        });
+    </script>
+</head>
+
+<body style="background-color:rgb(31, 31, 31);">
+    <div class="container">
+        <a href="/">Exchanges</a> > <a href="/exchange/{{ code }}">{{ code }}</a> > <b>{{ market }} {{ granularity
+            }}</b>
+        <p />
+
+        <h1>{{ market }} {{ granularity }}</h1>
+        <table id="dataTable" class="table table-sm table-dark table-bordered table-hover table-striped">
+            <thead>
+                <tr>
+
+                    <th>Timestamp</th>
+                    <th>Open</th>
+                    <th>High</th>
+                    <th>Low</th>
+                    <th>Close</th>
+                    <th>Volume</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for candle in candles %}
+                <tr>
+                    <td>{{ candle.datetime }}</td>
+                    <td>{{ candle.open }}</td>
+                    <td>{{ candle.high }}</td>
+                    <td>{{ candle.low }}</td>
+                    <td>{{ candle.close }}</td>
+                    <td>{{ candle.volume }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+
+</html>
