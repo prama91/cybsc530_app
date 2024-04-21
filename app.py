@@ -1,3 +1,4 @@
+from audioop import add
 import re
 import sys
 import argparse
@@ -52,6 +53,9 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
+    address = db.Column(db.String(80), nullable=False)
+    phone = db.Column(db.String(80), nullable=False)
+    ssn = db.Column(db.String(80), nullable=False)
     # is_active = db.Column(db.Boolean(), default=True)
 
     def __repr__(self):
@@ -110,14 +114,18 @@ def register():
         username = request.form['username']
         password = request.form['password']
         hashed_password = password
+        address = request.form['address']
+        phone = request.form['phone']
+        ssn = request.form['ssn']
 
-        new_user = User(username=username, password=hashed_password)
+        new_user = User(username=username, password=hashed_password,
+                        address=address, phone=phone, ssn=ssn)
         db.session.add(new_user)
         db.session.commit()
 
         return redirect(url_for('login'))
 
-    return render_template('registeration.html')
+    return render_template('registration.html')
 
 
 @app.route('/logout_page')
@@ -134,4 +142,5 @@ def logout():
 
 
 if __name__ == "__main__":
+    # db.create_all()
     app.run(host=http_host, port=http_port, debug=args.debug)
