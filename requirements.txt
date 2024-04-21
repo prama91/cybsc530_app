@@ -1,2 +1,6 @@
 flask
 eodhd
+Flask-Caching
+flask-login
+flask_sqlalchemy 
+flask_bcrypt

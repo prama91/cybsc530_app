@@ -5,6 +5,7 @@ import argparse
 from flask import Flask, render_template, url_for, redirect, request
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required
+from flask_caching import Cache
 from api.financial_data import EODHDAPIsDataFetcher
 from config import API_TOKEN
 
@@ -46,7 +47,9 @@ app = Flask(__name__)
 login_manager = LoginManager(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SECRET_KEY'] = 'this is a secret key '
+app.config['CACHE_TYPE'] = 'simple'
 db = SQLAlchemy(app)
+cache = Cache(app)
 
 
 class User(db.Model, UserMixin):
@@ -76,18 +79,21 @@ def home():
 
 
 @app.route("/welcome")
+@cache.cached(timeout=60)
 def welcome():
     exchanges = data_fetcher.fetch_exchanges()
     return render_template("exchanges.html", exchanges=exchanges)
 
 
 @app.route("/exchange/<code>")
+@cache.cached(timeout=60)
 def exchange_markets(code):
     markets = data_fetcher.fetch_exchange_markets(code)
     return render_template("markets.html", code=code, markets=markets)
 
 
 @app.route("/exchange/<code>/<market>/<granularity>")
+@cache.cached(timeout=60)
 def exchange_market_data(code, market, granularity):
     candles = data_fetcher.fetch_exchange_market_data(
         code, market, granularity)

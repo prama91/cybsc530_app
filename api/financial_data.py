@@ -9,6 +9,7 @@ class EODHDAPIsDataFetcher:
 
     def fetch_exchanges(self):
         try:
+            print("Fetching exchanges data from EoD backend")
             api = APIClient(self._api_token)
             df = api.get_exchanges()
             return json.loads(df.to_json(orient="records"))
@@ -19,6 +20,7 @@ class EODHDAPIsDataFetcher:
 
     def fetch_exchange_markets(self, code: str = ""):
         try:
+            print("Fetching market data from EoD backend")
             api = APIClient(self._api_token)
             df = api.get_exchange_symbols(code)
             return json.loads(df.to_json(orient="records"))
@@ -29,6 +31,7 @@ class EODHDAPIsDataFetcher:
 
     def fetch_exchange_market_data(self, code: str = "", market: str = "", granularity: str = ""):
         try:
+            print("Fetching stock data from EoD backend")
             api = APIClient(self._api_token)
             # df = api.get_ # api.get_historical_data(f"{market}.{code}", granularity)
             data = {
