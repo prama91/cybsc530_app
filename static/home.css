@@ -1,6 +1,6 @@
 body {
   font-family: "Arial", sans-serif;
-  background: linear-gradient(109deg, #20043b 20.29%, #4099d4 96.58%);
+  background: linear-gradient(109deg, #3e3e41 20.29%, #393a3a 96.58%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -14,8 +14,8 @@ body {
   padding: 20px;
   background: linear-gradient(
     109deg,
-    #323133 20.29%,
-    rgb(228, 232, 235) 96.58%
+    #2f0b92 20.29%,
+    #5727dd 96.58%
   );
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);

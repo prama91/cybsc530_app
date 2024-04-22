@@ -8,12 +8,18 @@
   <link rel="stylesheet" href="{{ url_for('static', filename='home.css') }}" />
 </head>
 
+<style>
+  .center-text {
+    text-align: center;
+  }
+</style>
+
 <body>
   <div class="container">
-    <h1>Sample Stock Exchange Web App for CYBSC530 (PRAMA)</h1>
-    <button><a href="{{url_for('login')}}">Click me to Login</a></button>
+    <h1 class="center-text">Sample Stock Exchange Web App for CYBSC530 (PRAMA)</h1>
+    <button><a href="{{url_for('login')}}">Login</a></button>
     <button>
-      <a href="{{url_for('register')}}">Click me to Register </a>
+      <a href="{{url_for('register')}}">Register</a>
     </button>
   </div>
 </body>
