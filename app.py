@@ -2,9 +2,9 @@ from audioop import add
 import re
 import sys
 import argparse
-from flask import Flask, render_template, url_for, redirect, request
+from flask import Flask, render_template, url_for, redirect, request, session
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required
+from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from flask_caching import Cache
 from api.financial_data import EODHDAPIsDataFetcher
 from config import API_TOKEN
@@ -79,25 +79,28 @@ def home():
 
 
 @app.route("/welcome")
+@login_required
 @cache.cached(timeout=60)
 def welcome():
     exchanges = data_fetcher.fetch_exchanges()
-    return render_template("exchanges.html", exchanges=exchanges)
+    return render_template("exchanges.html", exchanges=exchanges, name=current_user.username)
 
 
 @app.route("/exchange/<code>")
+@login_required
 @cache.cached(timeout=60)
 def exchange_markets(code):
     markets = data_fetcher.fetch_exchange_markets(code)
-    return render_template("markets.html", code=code, markets=markets)
+    return render_template("markets.html", code=code, markets=markets, name=current_user.username)
 
 
 @app.route("/exchange/<code>/<market>/<granularity>")
+@login_required
 @cache.cached(timeout=60)
 def exchange_market_data(code, market, granularity):
     candles = data_fetcher.fetch_exchange_market_data(
         code, market, granularity)
-    return render_template("data.html", code=code, market=market, granularity=granularity, candles=candles)
+    return render_template("data.html", code=code, market=market, granularity=granularity, candles=candles, name=current_user.username)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -106,6 +109,9 @@ def login():
         username = request.form['username']
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
+
+        print("login request:", request)
+        print("login request:", request.form)
 
         if user and user.password == password:
             login_user(user)

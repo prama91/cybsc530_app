@@ -6,12 +6,22 @@ import argparse
 from ast import arg
 import getpass
 from pathlib import Path
+import requests
+import time
+import aiohttp
+import asyncio
 
 attack_choices = [
     'ddos',
     'code_injection',
     'ssrf',
 ]
+
+# Fill in your details here to be posted to the login form.
+payload = {
+    'username': 'keanu',
+    'password': 'abc123'
+}
 
 
 class PasswordPromptAction(argparse.Action):
@@ -39,6 +49,34 @@ class PasswordPromptAction(argparse.Action):
         setattr(args, self.dest, password)
 
 
+class Hacker:
+    def __init__(self, username, password):
+        self.session = requests.Session()
+        self.login_url = "http://127.0.0.1:5000/login"
+        self.username = username
+        self.password = password
+        self.login()
+
+    def login(self):
+        login_data = {
+            "username": self.username,
+            "password": self.password
+        }
+        response = self.session.post(self.login_url, data=login_data)
+        if response.status_code == 200:
+            print(f"Logged in as {self.username}")
+        else:
+            print("Login failed")
+
+    def get(self, url):
+        response = self.session.get(url)
+        return response.text
+
+    def post(self, url, data):
+        response = self.session.post(url, data=data)
+        return response.text
+
+
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-a', dest='attack', required=True, choices=attack_choices,
@@ -50,5 +88,22 @@ parser.add_argument('-p', dest='password',
 
 args = parser.parse_args()
 
-print("Hello ", args.username)
 print("Starting Attack ", args.attack)
+
+hacker = Hacker(username=args.username, password=args.password)
+
+# Record the start time
+start_time = time.time()
+duration = 60
+while True:
+    current_time = time.time()
+    elapsed_time = current_time - start_time
+
+    # Check if the desired duration has been reached
+    if elapsed_time >= duration:
+        print(
+            f"Duration of {duration} seconds has elapsed. Exiting the loop.")
+        break
+
+    # Send an authorised request.
+    r = hacker.get('http://127.0.0.1:5000/exchange/US')
