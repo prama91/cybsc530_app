@@ -80,7 +80,7 @@ def home():
 
 @app.route("/welcome")
 @login_required
-@cache.cached(timeout=60)
+@cache.cached(timeout=5)
 def welcome():
     exchanges = data_fetcher.fetch_exchanges()
     return render_template("exchanges.html", exchanges=exchanges, name=current_user.username)
@@ -88,7 +88,7 @@ def welcome():
 
 @app.route("/exchange/<code>")
 @login_required
-@cache.cached(timeout=60)
+@cache.cached(timeout=5)
 def exchange_markets(code):
     markets = data_fetcher.fetch_exchange_markets(code)
     return render_template("markets.html", code=code, markets=markets, name=current_user.username)
@@ -96,7 +96,7 @@ def exchange_markets(code):
 
 @app.route("/exchange/<code>/<market>/<granularity>")
 @login_required
-@cache.cached(timeout=60)
+@cache.cached(timeout=5)
 def exchange_market_data(code, market, granularity):
     candles = data_fetcher.fetch_exchange_market_data(
         code, market, granularity)
@@ -154,5 +154,4 @@ def logout():
 
 
 if __name__ == "__main__":
-    # db.create_all()
-    app.run(host=http_host, port=http_port, debug=args.debug)
+    app.run(host=http_host, port=http_port, threaded=True)

