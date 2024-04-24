@@ -7,8 +7,10 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from flask_caching import Cache
 from api.financial_data import EODHDAPIsDataFetcher
-from config import API_TOKEN
+from config import API_TOKEN, ENABLE_RATE_LIMITING_PER_USER
 
+from flask_limiter import Limiter
+# from flask_limiter.util import get_remote_address
 
 parser = argparse.ArgumentParser(description="EODHD APIs")
 parser.add_argument(
@@ -45,6 +47,11 @@ if args.port is not None:
 
 app = Flask(__name__)
 login_manager = LoginManager(app)
+
+if ENABLE_RATE_LIMITING_PER_USER:
+    limiter = Limiter(app=app, key_func=lambda: current_user,
+                      default_limits=["1 per second"])
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///site.db'
 app.config['SECRET_KEY'] = 'this is a secret key '
 app.config['CACHE_TYPE'] = 'simple'
