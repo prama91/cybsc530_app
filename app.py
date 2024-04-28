@@ -74,7 +74,10 @@ class User(db.Model, UserMixin):
     password = db.Column(db.String(80), nullable=False)
     address = db.Column(db.String(80), nullable=False)
     phone = db.Column(db.String(80), nullable=False)
-    ssn = db.Column(EncryptedType(db.String, encryption_key), nullable=False)
+    if ENABLE_SAFE_SECRETS:
+        ssn = db.Column(EncryptedType(db.String, encryption_key), nullable=False)
+    else:
+        ssn = db.Column(db.String(80), nullable=False)
     # is_active = db.Column(db.Boolean(), default=True)
 
     def __repr__(self):
@@ -168,15 +171,11 @@ def register():
         except Exception as e:
             return render_template('registration.html', error=e), 401 #Unauthorized
 
-        try:
+        if ENABLE_SAFE_SECRETS:
             cipher_suite = Fernet(encryption_key)
-        except Exception as e:
-            print("step1: Encryption failed with error", e)
-
-        try:
             new_user_ssn = cipher_suite.encrypt(bytes(ssn, encoding='utf8'))
-        except Exception as e:
-            print("step2: Encryption failed with error", e)
+        else:
+            new_user_ssn = ssn
 
         new_user = User(username=username, password=hashed_password,
                         address=address, phone=phone, ssn=new_user_ssn)

@@ -192,5 +192,5 @@ print("Starting Attack --> ", args.attack)
 if args.attack == 'dos':
     asyncio.run(dos_attack(args.username, args.password))
 
-if args.attack == 'sql_injection':
+if args.attack == 'sql_injection' or args.attack == 'secret_leak':
     asyncio.run(sql_injection_attack())
