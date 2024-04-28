@@ -4,6 +4,7 @@ import sys
 import argparse
 from flask import Flask, render_template, url_for, redirect, request, session
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import text
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from flask_caching import Cache
 from api.financial_data import EODHDAPIsDataFetcher
@@ -117,11 +118,19 @@ def login():
         password = request.form['password']
 
         # Add check to run SQL query and throw error
-        
-        user = User.query.filter_by(username=username).first()
+        # Example raw SQL query
+        # Validate if user exit
+        raw_sql_query = text("SELECT username FROM user WHERE username = :username")
 
-        print("login request:", request)
-        print("login request:", request.form)
+        # Execute the query
+        with db.engine.connect() as conn:
+            result = conn.execute(raw_sql_query, {"username":username})
+            rows = result.fetchall()
+            if len(rows) == 1:
+                user = User.query.filter_by(username=username).first()
+            else:
+                error = f"Invalid username or password: ErrorDetails: {rows}"
+                return render_template('login.html', error=error), 401 #Unauthorized
 
         if user and user.password == password:
             login_user(user)
