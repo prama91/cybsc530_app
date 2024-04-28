@@ -117,22 +117,18 @@ def login():
         username = request.form['username']
         password = request.form['password']
 
-        # Add check to run SQL query and throw error
-        # Example raw SQL query
         # Validate if user exit
-        raw_sql_query = text("SELECT username FROM user WHERE username = :username")
-
-        # Execute the query
+        raw_sql_query = text(f"SELECT * FROM user WHERE username = '{username}'")
         with db.engine.connect() as conn:
-            result = conn.execute(raw_sql_query, {"username":username})
+            result = conn.execute(raw_sql_query)
             rows = result.fetchall()
-            if len(rows) == 1:
-                user = User.query.filter_by(username=username).first()
-            else:
+            print(rows)
+            if len(rows) != 1:
                 error = f"Invalid username or password: ErrorDetails: {rows}"
                 return render_template('login.html', error=error), 401 #Unauthorized
 
-        if user and user.password == password:
+        user = User.query.filter_by(username=username).first()
+        if user.password == password:
             login_user(user)
             return redirect(url_for('welcome'))
         else:
