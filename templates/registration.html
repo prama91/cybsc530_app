@@ -6,6 +6,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Register</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  <style>
+    .error {
+      color: red;
+      font-style: italic;
+    }
+  </style>
 </head>
 
 <body>
@@ -28,6 +34,10 @@
         <input type="text" name="ssn" required />
         <button type="submit">Register</button>
       </form>
+      {% if error %}
+      <p class="error">{{ error }}</p>
+      {% endif %}
+      <a href="{{url_for('register')}}">Don't have an account?? Register</a>
       <a href="{{url_for('login')}}">Already have an account ? Login </a>
     </div>
   </div>

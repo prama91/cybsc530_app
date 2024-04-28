@@ -8,7 +8,9 @@ from sqlalchemy import text
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from flask_caching import Cache
 from api.financial_data import EODHDAPIsDataFetcher
-from config import API_TOKEN, ENABLE_RATE_LIMITING_PER_USER
+from config import API_TOKEN, ENABLE_RATE_LIMITING_PER_USER, ENABLE_REMOTE_CODE_MITIGATION
+from utils import validate_input, validate_password, validate_username
+import traceback
 
 from flask_limiter import Limiter
 # from flask_limiter.util import get_remote_address
@@ -114,18 +116,21 @@ def exchange_market_data(code, market, granularity):
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
+        try:
+            username = validate_username(request.form['username'])
+            password = validate_password(request.form['password'])
+        except Exception as e:
+            return render_template('login.html', error=e), 401 #Unauthorized
 
-        # Validate if user exit
-        raw_sql_query = text(f"SELECT * FROM user WHERE username = '{username}'")
-        with db.engine.connect() as conn:
-            result = conn.execute(raw_sql_query)
-            rows = result.fetchall()
-            print(rows)
-            if len(rows) != 1:
-                error = f"Invalid username or password: ErrorDetails: {rows}"
-                return render_template('login.html', error=error), 401 #Unauthorized
+        # Validate if user exists
+        if not ENABLE_REMOTE_CODE_MITIGATION:
+            raw_sql_query = text(f"SELECT * FROM user WHERE username = '{username}'")
+            with db.engine.connect() as conn:
+                result = conn.execute(raw_sql_query)
+                rows = result.fetchall()
+                if len(rows) != 1:
+                    error = f"Invalid username or password: ErrorDetails: {rows}"
+                    return render_template('login.html', error=error), 401 #Unauthorized
 
         user = User.query.filter_by(username=username).first()
         if user.password == password:
@@ -141,12 +146,15 @@ def login():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        hashed_password = password
-        address = request.form['address']
-        phone = request.form['phone']
-        ssn = request.form['ssn']
+        try:
+            username = validate_username(request.form['username'])
+            password = validate_password(request.form['password'])
+            hashed_password = password
+            address = validate_input(request.form['address'])
+            phone = validate_input(request.form['phone'])
+            ssn = validate_input(request.form['ssn'])
+        except Exception as e:
+            return render_template('registration.html', error=e), 401 #Unauthorized
 
         new_user = User(username=username, password=hashed_password,
                         address=address, phone=phone, ssn=ssn)
