@@ -4,11 +4,12 @@ import sys
 import argparse
 from flask import Flask, render_template, url_for, redirect, request, session
 from flask_sqlalchemy import SQLAlchemy
+from flask_bcrypt import Bcrypt 
 from sqlalchemy import text
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from flask_caching import Cache
 from api.financial_data import EODHDAPIsDataFetcher
-from config import API_TOKEN, ENABLE_RATE_LIMITING_PER_USER, ENABLE_REMOTE_CODE_MITIGATION
+from config import API_TOKEN, ENABLE_RATE_LIMITING_PER_USER, ENABLE_REMOTE_CODE_MITIGATION, ENABLE_SAFE_SECRETS
 from utils import validate_input, validate_password, validate_username
 import traceback
 
@@ -61,6 +62,8 @@ app.config['CACHE_TYPE'] = 'simple'
 db = SQLAlchemy(app)
 cache = Cache(app)
 
+if ENABLE_SAFE_SECRETS:
+    bcrypt = Bcrypt(app)
 
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
@@ -133,7 +136,10 @@ def login():
                     return render_template('login.html', error=error), 401 #Unauthorized
 
         user = User.query.filter_by(username=username).first()
-        if user.password == password:
+        if ENABLE_SAFE_SECRETS and bcrypt.check_password_hash(user.password, password):
+            login_user(user)
+            return redirect(url_for('welcome'))
+        elif not ENABLE_SAFE_SECRETS and user.password == password:
             login_user(user)
             return redirect(url_for('welcome'))
         else:
@@ -149,7 +155,10 @@ def register():
         try:
             username = validate_username(request.form['username'])
             password = validate_password(request.form['password'])
-            hashed_password = password
+            if ENABLE_SAFE_SECRETS:
+                hashed_password = bcrypt.generate_password_hash(password).decode('utf-8') 
+            else:
+                hashed_password = password
             address = validate_input(request.form['address'])
             phone = validate_input(request.form['phone'])
             ssn = validate_input(request.form['ssn'])

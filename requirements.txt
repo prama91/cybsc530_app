@@ -3,4 +3,4 @@ eodhd
 Flask-Caching
 flask-login
 flask_sqlalchemy 
-flask_bcrypt
+flask-bcrypt
