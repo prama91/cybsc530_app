@@ -115,6 +115,9 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
+
+        # Add check to run SQL query and throw error
+        
         user = User.query.filter_by(username=username).first()
 
         print("login request:", request)
@@ -123,6 +126,9 @@ def login():
         if user and user.password == password:
             login_user(user)
             return redirect(url_for('welcome'))
+        else:
+            error = 'Invalid username or password.'
+            return render_template('login.html', error=error), 401 #Unauthorized
 
     return render_template('login.html')
 

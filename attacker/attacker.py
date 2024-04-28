@@ -10,6 +10,7 @@ import requests
 import time
 import aiohttp
 import asyncio
+import sys
 
 attack_choices = [
     'ddos',
@@ -58,6 +59,9 @@ class AsyncHttpClient:
                 print("Login successful")
             else:
                 print("Login failed")
+                print(await response.text())
+                exit(1)
+                
         except Exception as e:
             print(f"Error during login: {e}")
 
@@ -138,21 +142,17 @@ parser.add_argument('-p', dest='password',
 
 args = parser.parse_args()
 
-print("Starting Attack ", args.attack)
-
-
 async def dos_attack(username, password):
     base_url = "http://localhost:5000"  # Replace with your server URL
 
     client = AsyncHttpClient()
+
     await client.login(username, password)
 
-    # Example usage: send multiple GET requests in parallel
-    # Replace with your desired endpoints
     endpoint = "exchange/US"
     await client.get("http://localhost:5000/exchange/US")
-    # Record the start time
 
+    # Record the start time
     start_time = time.time()
     duration = 60
 
@@ -174,4 +174,7 @@ async def dos_attack(username, password):
 
     await client.close_session()
 
-asyncio.run(dos_attack(args.username, args.password))
+print("Starting Attack --> ", args.attack)
+
+if args.attack == 'ddos':
+    asyncio.run(dos_attack(args.username, args.password))
