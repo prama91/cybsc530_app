@@ -11,7 +11,8 @@ from flask_caching import Cache
 from api.financial_data import EODHDAPIsDataFetcher
 from config import API_TOKEN, ENABLE_RATE_LIMITING_PER_USER, ENABLE_REMOTE_CODE_MITIGATION, ENABLE_SAFE_SECRETS
 from utils import validate_input, validate_password, validate_username
-import traceback
+from sqlalchemy_utils import EncryptedType
+from cryptography.fernet import Fernet
 
 from flask_limiter import Limiter
 # from flask_limiter.util import get_remote_address
@@ -30,6 +31,7 @@ parser.add_argument(
 parser.add_argument("--debug", action="store_true", help="Enable debugging")
 args = parser.parse_args()
 
+encryption_key = b'DZ1kh-bNO3VPqwTJxzp8NBdvg8zDVYw3crNJVURNXwM=' 
 
 # Listen on local host
 http_host = "0.0.0.0"
@@ -66,12 +68,13 @@ if ENABLE_SAFE_SECRETS:
     bcrypt = Bcrypt(app)
 
 class User(db.Model, UserMixin):
+    __tablename__ = "user"
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(20), unique=True, nullable=False)
     password = db.Column(db.String(80), nullable=False)
     address = db.Column(db.String(80), nullable=False)
     phone = db.Column(db.String(80), nullable=False)
-    ssn = db.Column(db.String(80), nullable=False)
+    ssn = db.Column(EncryptedType(db.String, encryption_key), nullable=False)
     # is_active = db.Column(db.Boolean(), default=True)
 
     def __repr__(self):
@@ -165,8 +168,18 @@ def register():
         except Exception as e:
             return render_template('registration.html', error=e), 401 #Unauthorized
 
+        try:
+            cipher_suite = Fernet(encryption_key)
+        except Exception as e:
+            print("step1: Encryption failed with error", e)
+
+        try:
+            new_user_ssn = cipher_suite.encrypt(bytes(ssn, encoding='utf8'))
+        except Exception as e:
+            print("step2: Encryption failed with error", e)
+
         new_user = User(username=username, password=hashed_password,
-                        address=address, phone=phone, ssn=ssn)
+                        address=address, phone=phone, ssn=new_user_ssn)
         db.session.add(new_user)
         db.session.commit()
 

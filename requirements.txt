@@ -4,3 +4,5 @@ Flask-Caching
 flask-login
 flask_sqlalchemy 
 flask-bcrypt
+cryptography
+sqlalchemy-utils
