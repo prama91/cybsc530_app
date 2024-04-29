@@ -9,7 +9,7 @@ from sqlalchemy import text
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from flask_caching import Cache
 from api.financial_data import EODHDAPIsDataFetcher
-from config import API_TOKEN, ENABLE_RATE_LIMITING_PER_USER, ENABLE_REMOTE_CODE_MITIGATION, ENABLE_SAFE_SECRETS
+from config import API_TOKEN, ENABLE_RATE_LIMITING_PER_USER, ENABLE_REMOTE_CODE_MITIGATION, ENABLE_SAFE_SECRETS, ENABLE_HTTPS
 from utils import validate_input, validate_password, validate_username
 from sqlalchemy_utils import EncryptedType
 from cryptography.fernet import Fernet
@@ -112,6 +112,10 @@ def exchange_markets(code):
     markets = data_fetcher.fetch_exchange_markets(code)
     return render_template("markets.html", code=code, markets=markets, name=current_user.username)
 
+@app.route('/exchange/about')
+def about():
+    print("Rendering about.html")
+    return render_template('about.html')  # Render the "about.html" template
 
 @app.route("/exchange/<code>/<market>/<granularity>")
 @login_required
@@ -201,4 +205,7 @@ def logout():
 
 
 if __name__ == "__main__":
-    app.run(host=http_host, port=http_port, threaded=True)
+    if ENABLE_HTTPS    :
+        app.run(host=http_host, port=http_port, threaded=True, ssl_context=('cert.pem', 'key.pem'))
+    else:
+        app.run(host=http_host, port=http_port, threaded=True)
