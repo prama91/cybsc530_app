@@ -202,6 +202,7 @@ def logout_page():
 def meet_mascot():
     # Extract the URL from the form data (you can adjust this based on your actual use case)
     mascot_url = request.form.get('mascot_url')
+    print("Downloading Mascot from:", mascot_url)
 
     try:
         # Perform an HTTP request to the provided URL (SSRF vulnerability)
