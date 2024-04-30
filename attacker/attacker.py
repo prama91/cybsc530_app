@@ -187,10 +187,19 @@ async def sql_injection_attack():
 
     await client.close_session()
 
-print("Starting Attack --> ", args.attack)
+def ssrf_help():
+    print("""
+        SSRF attack isn't automated by script. See project notes for doing an SSRF. In short, install Burp community tool and inspect post requests for URL injection opportunity in the about.html page
+            """)
+
+
+print("Starting Attack: ", args.attack)
 
 if args.attack == 'dos':
     asyncio.run(dos_attack(args.username, args.password))
 
 if args.attack == 'sql_injection' or args.attack == 'secret_leak':
     asyncio.run(sql_injection_attack())
+
+if args.attack == 'ssrf':
+    ssrf_help()
