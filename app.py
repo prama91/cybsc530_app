@@ -2,7 +2,8 @@ from audioop import add
 import re
 import sys
 import argparse
-from flask import Flask, render_template, url_for, redirect, request, session
+import io
+from flask import Flask, render_template, url_for, redirect, request, session, send_file
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt 
 from sqlalchemy import text
@@ -13,6 +14,7 @@ from config import API_TOKEN, ENABLE_RATE_LIMITING_PER_USER, ENABLE_REMOTE_CODE_
 from utils import validate_input, validate_password, validate_username
 from sqlalchemy_utils import EncryptedType
 from cryptography.fernet import Fernet
+import requests  # Import the requests library
 
 from flask_limiter import Limiter
 # from flask_limiter.util import get_remote_address
@@ -195,6 +197,25 @@ def register():
 def logout_page():
     logout_user()
     return render_template('logout.html')
+
+@app.route('/meet_mascot', methods=['POST'])
+def meet_mascot():
+    # Extract the URL from the form data (you can adjust this based on your actual use case)
+    mascot_url = request.form.get('mascot_url')
+
+    try:
+        # Perform an HTTP request to the provided URL (SSRF vulnerability)
+        response = requests.get(mascot_url)
+
+        return send_file(
+            io.BytesIO(response.content),
+            mimetype='image/png'  # Adjust the MIME type based on the image format
+        )
+
+        # Process the response as needed (e.g., extract content, status code, etc.)
+        # For demonstration purposes, let's just return the response content
+    except requests.exceptions.RequestException:
+        return "Error: Unable to fetch mascot data from the provided URL."
 
 
 @app.route('/logout')

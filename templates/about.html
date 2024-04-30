@@ -1,20 +1,25 @@
-<!-- templates/about.html -->
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 <head>
-    <title>About Us</title>
     <meta charset="UTF-8">
-    <script src="{{ url_for('static', filename='mascot.js') }}"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us</title>
 </head>
 
 <body>
-    <h1>About Our App</h1>
-    <p style="font-size:40px">This app is meant to showcase some common web vulnerabilities, browse carefully!
-        &#128520;
-    </p>
-    <button onclick="downloadHtmlFromUrl()">Meet Our Cute Mascot</button>
-    <p id="response"></p> <!-- Display the response here -->
+    <div class="container">
+        <h1>About Our App</h1>
+        <p style="font-size:40px">This app is meant to showcase some common web vulnerabilities, browse carefully!
+            &#128520;
+        </p>
+        <form method="post" action="/meet_mascot">
+            <input type="hidden" id="mascot_url" name="mascot_url" value="https://i.ibb.co/nPkYyQ7/pikachu.png"
+                required>
+            <button type="submit">Meet our Cute Mascot</button>
+            <p id="response"></p> <!-- Display the response here -->
+        </form>
+    </div>
 </body>
 
 </html>
