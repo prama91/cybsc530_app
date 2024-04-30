@@ -9,7 +9,7 @@ from sqlalchemy import text
 from flask_login import UserMixin, LoginManager, login_user, logout_user, login_required, current_user
 from flask_caching import Cache
 from api.financial_data import EODHDAPIsDataFetcher
-from config import API_TOKEN, ENABLE_RATE_LIMITING_PER_USER, ENABLE_REMOTE_CODE_MITIGATION, ENABLE_SAFE_SECRETS, ENABLE_HTTPS
+from config import API_TOKEN, ENABLE_RATE_LIMITING_PER_USER, ENABLE_REMOTE_CODE_MITIGATION, ENABLE_SAFE_SECRETS, ENABLE_HTTPS, ENABLE_SSRF_MITIGATION
 from utils import validate_input, validate_password, validate_username
 from sqlalchemy_utils import EncryptedType
 from cryptography.fernet import Fernet
@@ -17,6 +17,12 @@ import requests  # Import the requests library
 
 from flask_limiter import Limiter
 # from flask_limiter.util import get_remote_address
+
+# 3d Party allowed URLs
+allowlist = [
+    "https://i.ibb.co/nPkYyQ7/pikachu.png",
+    # Add more URLs as needed
+]
 
 parser = argparse.ArgumentParser(description="EODHD APIs")
 parser.add_argument(
@@ -33,6 +39,15 @@ parser.add_argument("--debug", action="store_true", help="Enable debugging")
 args = parser.parse_args()
 
 encryption_key = b'DZ1kh-bNO3VPqwTJxzp8NBdvg8zDVYw3crNJVURNXwM=' 
+
+def is_url_in_allowlist(url, allowlist):
+    """
+    Checks if the given URL is in the allowlist.
+    :param url: The URL to check
+    :param allowlist: List of allowed URLs
+    :return: True if the URL is in the allowlist, False otherwise
+    """
+    return url in allowlist
 
 # Listen on local host
 http_host = "0.0.0.0"
@@ -201,7 +216,12 @@ def logout_page():
 def meet_mascot():
     # Extract the URL from the form data (you can adjust this based on your actual use case)
     mascot_url = request.form.get('mascot_url')
-    print("Downloading Mascot from:", mascot_url)
+    if ENABLE_SSRF_MITIGATION:
+        if is_url_in_allowlist(mascot_url, allowlist):
+            print("Downloading Mascot from:", mascot_url)
+        else:
+            print("Request Denied:", mascot_url)
+            return "Error: Unable to fetch mascot data."
 
     try:
         # Perform an HTTP request to the provided URL (SSRF vulnerability)
