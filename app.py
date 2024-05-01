@@ -110,7 +110,7 @@ def load_user(user_id):
 
 @app.route('/')
 def home():
-    return render_template('Home.html')
+    return render_template('home.html')
 
 
 @app.route("/welcome")
