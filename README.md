@@ -10,15 +10,26 @@ atleast vulnerable to following attacks:
 1. Leakage of Secrets
 1. SSRF (Server Side request forgery)
 
-## Steps to build the webserver app
+## Steps to run the webserver app (Using Docker)
 
 1. Clone the repo.
 1. Go to [eodhd.com](https://eodhd.com/financial-apis/user-api) and get an API token.
 1. Open config.py file and add the token to the `TOKEN_API` field.
-1. Install Docker on your system.
+1. Install Docker on your system. See: https://docs.docker.com/get-docker/
 1. From command line, execute `docker build --tag python-webapp .`.
 1. From command line, execute `docker run -it -p 8080:5000 --name test-project python-webapp`
 1. Open browser window and go to address: `http://localhost:8080/`
+1. Create an account on the website to access the webpages.
+
+## Steps to run the webserver app (Native)
+
+1. Clone the repo.
+1. Go to [eodhd.com](https://eodhd.com/financial-apis/user-api) and get an API token.
+1. Open config.py file and add the token to the `TOKEN_API` field.
+1. Install python3. See https://www.python.org/downloads/
+1. Run  `pip3 install -r requirements.txt` to install dependencies.
+1. From command-line, run `python3 app.py --host=127.0.0.1 --port=5000`
+1. Open browser window and go to address: `http://localhost:5000/`
 1. Create an account on the website to access the webpages.
 
 ## Steps to start an attack
